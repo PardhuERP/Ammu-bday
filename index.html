@@ -64,6 +64,7 @@ function finalSurprise(){document.getElementById('finalMessage').style.display='
 function floatThing(isHeart=false){const e=document.createElement('span');e.className=isHeart?'heart':'petal';e.textContent=isHeart?['♥','💕','💗','💖'][Math.floor(Math.random()*4)]:['🌸','🌹','✿','❀'][Math.floor(Math.random()*4)];e.style.left=Math.random()*100+'vw';e.style.bottom='-40px';e.style.fontSize=(16+Math.random()*22)+'px';e.style.animationDuration=(6+Math.random()*7)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),14000)}
 setInterval(()=>floatThing(Math.random()>.45),700);
 
+
 let audioCtx = null;
 let musicOn = false;
 let musicTimer = null;
@@ -74,58 +75,65 @@ function toggleMusic() {
     return;
   }
 
-  try {
-    audioCtx = new (window.AudioContext ||
-      window.webkitAudioContext)();
+  audioCtx = new (window.AudioContext ||
+    window.webkitAudioContext)();
 
-    audioCtx.resume();
-    musicOn = true;
+  audioCtx.resume();
+  musicOn = true;
 
-    document.getElementById('musicBtn').textContent =
-      '♫ Pause romantic melody';
+  document.getElementById('musicBtn').textContent =
+    '♫ Pause Happy Birthday';
 
-    const notes = [
-      261.63, 329.63, 392.00, 329.63,
-      293.66, 349.23, 440.00, 349.23,
-      261.63, 329.63, 392.00, 523.25
-    ];
+  // Happy Birthday melody — C major
+  const melody = [
+    [392, 0.35], [392, 0.35], [440, 0.7],
+    [392, 0.7], [523.25, 0.7], [493.88, 1.1],
+    [392, 0.35], [392, 0.35], [440, 0.7],
+    [392, 0.7], [587.33, 0.7], [523.25, 1.1],
+    [392, 0.35], [392, 0.35], [783.99, 0.7],
+    [659.25, 0.7], [523.25, 0.7], [493.88, 0.7],
+    [440, 1.1], [698.46, 0.35], [698.46, 0.35],
+    [659.25, 0.7], [523.25, 0.7], [587.33, 0.7],
+    [523.25, 1.2]
+  ];
 
-    let n = 0;
+  let i = 0;
 
-    function playNote() {
-      if (!musicOn || !audioCtx) return;
+  function playNote() {
+    if (!musicOn || !audioCtx) return;
 
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.value = notes[n % notes.length];
-
-      // Gentle fade-in and fade-out
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(
-        0.20, now + 0.08
-      );
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001, now + 0.85
-      );
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.9);
-
-      n++;
-      musicTimer = setTimeout(playNote, 650);
+    if (i >= melody.length) {
+      i = 0;
+      musicTimer = setTimeout(playNote, 900);
+      return;
     }
 
-    playNote();
+    const [frequency, duration] = melody[i++];
+    const now = audioCtx.currentTime;
 
-  } catch (e) {
-    alert('Please check your browser audio settings.');
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.04);
+    gain.gain.setValueAtTime(0.18, now + duration * 0.65);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001, now + duration
+    );
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+
+    musicTimer = setTimeout(playNote, duration * 1000 + 70);
   }
+
+  playNote();
 }
 
 function stopMusic() {
@@ -138,7 +146,7 @@ function stopMusic() {
   }
 
   document.getElementById('musicBtn').textContent =
-    '♫ Play soft romantic melody';
+    '♫ Play Happy Birthday';
 }
 
  
