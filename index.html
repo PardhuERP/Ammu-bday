@@ -63,8 +63,85 @@ function openModal(src){document.getElementById('largePhoto').src=src;document.g
 function finalSurprise(){document.getElementById('finalMessage').style.display='block';for(let i=0;i<35;i++)setTimeout(()=>floatThing(true),i*65)}
 function floatThing(isHeart=false){const e=document.createElement('span');e.className=isHeart?'heart':'petal';e.textContent=isHeart?['♥','💕','💗','💖'][Math.floor(Math.random()*4)]:['🌸','🌹','✿','❀'][Math.floor(Math.random()*4)];e.style.left=Math.random()*100+'vw';e.style.bottom='-40px';e.style.fontSize=(16+Math.random()*22)+'px';e.style.animationDuration=(6+Math.random()*7)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),14000)}
 setInterval(()=>floatThing(Math.random()>.45),700);
-let audioCtx=null,oscillators=[],musicTimer=null,musicOn=false;
-function toggleMusic(){if(musicOn){stopMusic();return}try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();musicOn=true;document.getElementById('musicBtn').textContent='♫ Pause romantic melody';const notes=[261.63,329.63,392,329.63,293.66,349.23,440,349.23,261.63,329.63,392,523.25];let n=0;function playNote(){if(!musicOn)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=notes[n%notes.length];g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.015,audioCtx.currentTime+.08);g.gain.exponentialRampToValueAtTime(15,audioCtx.currentTime+.8);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.85);n++;musicTimer=setTimeout(playNote,520)}playNote()}catch(e){alert('Audio is not supported in this browser.')}}function stopMusic(){musicOn=false;clearTimeout(musicTimer);if(audioCtx){audioCtx.close();audioCtx=null}document.getElementById('musicBtn').textContent='♫ Play soft romantic melody'}
+
+let audioCtx = null;
+let musicOn = false;
+let musicTimer = null;
+
+function toggleMusic() {
+  if (musicOn) {
+    stopMusic();
+    return;
+  }
+
+  try {
+    audioCtx = new (window.AudioContext ||
+      window.webkitAudioContext)();
+
+    audioCtx.resume();
+    musicOn = true;
+
+    document.getElementById('musicBtn').textContent =
+      '♫ Pause romantic melody';
+
+    const notes = [
+      261.63, 329.63, 392.00, 329.63,
+      293.66, 349.23, 440.00, 349.23,
+      261.63, 329.63, 392.00, 523.25
+    ];
+
+    let n = 0;
+
+    function playNote() {
+      if (!musicOn || !audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.value = notes[n % notes.length];
+
+      // Gentle fade-in and fade-out
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(
+        0.20, now + 0.08
+      );
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001, now + 0.85
+      );
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.9);
+
+      n++;
+      musicTimer = setTimeout(playNote, 650);
+    }
+
+    playNote();
+
+  } catch (e) {
+    alert('Please check your browser audio settings.');
+  }
+}
+
+function stopMusic() {
+  musicOn = false;
+  clearTimeout(musicTimer);
+
+  if (audioCtx) {
+    audioCtx.close();
+    audioCtx = null;
+  }
+
+  document.getElementById('musicBtn').textContent =
+    '♫ Play soft romantic melody';
+}
+
+ 
 </script>
 </body>
 </html>
